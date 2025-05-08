@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Línea Temporal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, serif;
+      color: white;
+      background-image: url('https://static.wixstatic.com/media/f2a4bb_23abfb97209b45d39bdbe67f556354a4~mv2.webp');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: top center;
+      background-attachment: fixed;
+    }
+    
+    h2, h3 {
+      font-family: 'Pathway Gothic One', sans-serif;
+    }
+    
+    header {
+      padding: 40px 20px 20px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    header h1 {
+      font-size: 36px;
+      margin-bottom: 15px;
+      font-family: 'Pathway Gothic One', sans-serif;
+    }
+    
+    header p {
+      font-size: 18px;
+      max-width: 1200px;
+      margin: 0 auto;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+    
+    .container {
+      display: flex;
+      width: 100%;
+      height: calc(100vh);
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .sidebar {
+      width: 180px;
+      overflow-y: auto;
+      padding: 20px 10px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+    
+    #dates {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+    
+    #dates li {
+      margin-bottom: 25px;
+      cursor: pointer;
+      position: relative;
+      padding-left: 20px;
+      font-size: 14px;
+      transition: color 0.3s;
+      color: #ccc;
+    }
+    
+    #dates li::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+      left: 0;
+      top: 4px;
+    }
+    
+    #dates::before {
+      content: '';
+      position: absolute;
+      width: 4px;
+      background: white;
+      top: 0;
+      bottom: 0;
+      left: 5px;
+      z-index: 0;
+    }
+    
+    #dates li.active {
+      font-weight: bold;
+      color: white;
+    }
+    
+    .content {
+      flex: 1;
+      position: relative;
+      overflow-y: auto;
+      padding: 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .content::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+    
+    .nav-arrow {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .arrow-wrapper-top {
+      margin-bottom: 20px;
+    }
+    
+    .arrow-wrapper-bottom {
+      margin-top: 20px;
+    }
+    
+    .event {
+      max-width: 700px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: left;
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
+    .event.active {
+      display: block;
+    }
+    
+    .event img {
+      max-width: 100%;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+    }
+    
+    .event p {
+      margin-bottom: 15px;
+      line-height: 1.5;
+      color: #eee;
+    }
+    
+    .event h2 {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 5px;
+      color: #fff;
+    }
+    
+    .event h3 {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #ccc;
+      font-weight: normal;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    	.event p a {
+    		  color: #eee !important;
+    		  text-decoration: underline !important;
+    	}
+    	
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80px;
+        padding-left: 6px;
+      }
+    
+      #dates li {
+        margin-bottom: 20px;
+        font-size: 12px;
+        padding-left: 14px;
+      }
+    
+      #dates li::before {
+        width: 8px;
+        height: 8px;
+        top: 4px;
+        left: 0px;
+      }
+    
+      #dates::before {
+        left: 3px;
+      }
+    
+      .nav-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+    
+      .content {
+        padding: 10px;
+        justify-content: flex-start;
+      }
+    
+      .event h2 {
+        font-size: 20px;
+      }
+    
+      .event h3 {
+        font-size: 16px;
+      }
+    
+      .container {
+        height: calc(100vh - 240px);
+      }
+      
+      .video-container {
+    		  position: relative;
+    		  padding-bottom: 56.25%; /* Relación 16:9 */
+    		  height: 0;
+    		  overflow: hidden;
+    		  max-width: 100%;
+    		}
+    
+    		.video-container iframe {
+    			 position: absolute;
+    		  top: 0;
+    		  left: 0;
+    		  width: 100%;
+    	  height: 100%;
+        }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Seiki. Una cronología</h1>
+    <p>¡Bienvenidos a este anexo de Seiki! Si esto fuera un DVD, lo llamaríamos «los extras», pero eso solo lo pensamos los del mundo analógico, aunque, en los tiempos en que se desarrolla la trama, los DVD fueran el futuro.Le hemos dado un formato de línea del tiempo y, en ella, podréis ver eventos reales, escenas de la novela y fotos de mi proceso, capturas de mi vieja agenda Moleskine (donde tomé las primeras notas para Seiki), de la biblia de la novela y de fotos que cogí como referencia.Con ello, descubriréis mucho de la intrahistoria de la novela y muchos de los porqués de las elecciones que tomé.Los que me seguís desde hace un tiempo ya conocéis un poco de mi proceso, pues ahora toca adentrarse con un poco más de detalle, aunque intentaré no dar mucho la turra.<br>Como pronto descubriréis, opino que, si nos basamos en algo real, se leerá y se sentirá como algo mucho más verdadero que si lo inventamos al 100%.<br>Vamos ya al lío, pero antes de comenzar, dos avisos: algunas de las capturas que veáis aquí están en varios idiomas, porque, cuando tomo notas, las puedo tomar en castellano, inglés o catalán. Las traduciré para el texto, pero he mantenido las capturas en su idioma original.Y el segundo aviso: la línea temporal contiene <b>SPOILERS</b> de la novela. Os recomiendo leer esto, <b>DESPUÉS</b>, de terminar la lectura.<br>Veréis fechas repetidas, porque he decidido separar cada evento en aras de la claridad. Además, tenéis dos formas de navegar, con las flechas arriba y abajo de cada evento o con la barra lateral de fechas.<br>¡Seguid bajando y nos vemos al final!</p>
+  </header>
+
+  <div class="container">
+    <div class="sidebar">
+      <ul id="dates">
+        <li data-index="0" class="active">01.1893</li>
+        <li data-index="1">01.01.1900</li>
+        <li data-index="2">10.1907</li>
+        <li data-index="3">02.1908</li>
+        <li data-index="4">04.1908</li>
+        <li data-index="5">04.1908 a 03.1917</li>
+        <li data-index="6">24.03.1905</li>
+        <li data-index="7">25.03.1905</li>
+        <li data-index="8">26.03.1905</li>
+        <li data-index="9">1913</li>
+        <li data-index="10">28.07.1914 a 11.11.1918</li>
+        <li data-index="11">1914 a 1940</li>
+        <li data-index="12">01.01.1915</li>
+        <li data-index="13">1915</li>
+        <li data-index="14">04.1915</li>
+        <li data-index="16">05.1915</li>
+        <li data-index="21">05.1915 a 08.1915</li>
+        <li data-index="22">01.09.1915 a 30.12.1919</li>
+        <li data-index="23">12.1917</li>
+        <li data-index="24">22.09.1919</li>
+        <li data-index="25">30.12.1919</li>
+        <li data-index="26">1920 a 1927</li>
+        <li data-index="27">1924</li>
+        <li data-index="28">12.1928</li>
+        <li data-index="29">02.1929</li>
+        <li data-index="30">09.1929</li>
+        <li data-index="31">1930</li>
+        <li data-index="32">12.1930</li>
+        <li data-index="33">13.05.1931</li>
+        <li data-index="34">17.06.1934</li>
+        <li data-index="35">23.11.1936</li>
+        <li data-index="36">25.11.1936</li>
+        <li data-index="37">1937</li>
+        <li data-index="38">1940</li>
+        <li data-index="40">06.12.1941</li>
+        <li data-index="41">07.12.1941</li>
+        <li data-index="42">1943</li>
+        <li data-index="43">06.08.1945</li>
+        <li data-index="44">01.09.1945</li>
+        <li data-index="45">01.09.1945 a 02.07.1946</li>
+        <li data-index="46">15.07.1946</li>
+        <li data-index="47">15.07.1946 a 31.12.1947</li>
+        <li data-index="48">01.01.1948 a 29.07.1948</li>
+        <li data-index="49">1949</li>
+        <li data-index="50">1950</li>
+        <li data-index="51">25.06.1950 a 27.07.1953</li>
+        <li data-index="52">07.1950</li>
+        <li data-index="53">01.1951</li>
+        <li data-index="54">1955 a 1975</li>
+        <li data-index="55">10.09.1960</li>
+        <li data-index="56">19.09.1960 a 24.09.1960</li>
+        <li data-index="57">05.02.1963</li>
+        <li data-index="58">1967</li>
+        <li data-index="59">13.01.1968</li>
+        <li data-index="60">14.01.1968 a 01.03.1990</li>
+        <li data-index="61">14.01.1968 a 15.11.1968</li>
+        <li data-index="62">04.11.1968 a 13.11.1968</li>
+        <li data-index="63">13.11.1968</li>
+        <li data-index="64">14.11.1968</li>
+        <li data-index="65">15.11.1968</li>
+        <li data-index="66">16.11.1968</li>
+        <li data-index="67">03.02.1969</li>
+        <li data-index="68">03.1969</li>
+        <li data-index="69">15.11.1969</li>
+        <li data-index="71">15.03.1970 a 13.09.1970</li>
+        <li data-index="72">05.1972</li>
+        <li data-index="73">1975</li>
+        <li data-index="74">19.10.1977</li>
+        <li data-index="75">08.1978</li>
+        <li data-index="76">01.09.1978</li>
+        <li data-index="77">01.09.1978 a 03.09.1982</li>
+        <li data-index="78">1979 a 1982</li>
+        <li data-index="79">20.01.1981 a 21.01.1989</li>
+        <li data-index="80">24.12.1981 a 26.12.1981</li>
+        <li data-index="81">1982</li>
+        <li data-index="82">03.1982</li>
+        <li data-index="83">05.1982</li>
+        <li data-index="84">01.09.1982</li>
+        <li data-index="85">03.09.1982</li>
+        <li data-index="87">04.09.1982</li>
+        <li data-index="88">05.09.1982</li>
+        <li data-index="89">10.12.1982</li>
+        <li data-index="90">02.01.1983</li>
+        <li data-index="91">03.01.1983</li>
+        <li data-index="94">01.1983 a 09.1987</li>
+        <li data-index="95">23.01.1983 a 08.03.1987</li>
+        <li data-index="96">15.06.1983</li>
+        <li data-index="98">07.1983</li>
+        <li data-index="99">08.06.1984</li>
+        <li data-index="100">31.10.1984</li>
+        <li data-index="101">1985</li>
+        <li data-index="102">03.07.1985</li>
+        <li data-index="103">27.08.1985</li>
+        <li data-index="104">27.12.1985</li>
+        <li data-index="105">26.01.1986</li>
+        <li data-index="106">07.02.1986</li>
+        <li data-index="107">15.04.1986</li>
+        <li data-index="108">26.04.1986</li>
+        <li data-index="109">19.12.1986</li>
+        <li data-index="110">29.03.1987</li>
+        <li data-index="111">09.04.1987</li>
+        <li data-index="112">05.1987</li>
+        <li data-index="113">09.1987 a 03.1988</li>
+        <li data-index="114">04.03.1988 a 13.03.1988</li>
+        <li data-index="115">06.03.1988</li>
+        <li data-index="116">14.03.1988 a 24.05.1988</li>
+        <li data-index="117">25.05.1988</li>
+        <li data-index="118">26.05.1988 a 15.08.1988</li>
+        <li data-index="119">15.08.1988</li>
+        <li data-index="120">21.08.1988</li>
+        <li data-index="121">22.08.1988 a 28.08.1988</li>
+        <li data-index="122">22.08.1988</li>
+        <li data-index="123">28.08.1988</li>
+        <li data-index="124">29.08.1988</li>
+        <li data-index="125">29.08.1988 a 30.08.1988</li>
+        <li data-index="126">30.08.1988</li>
+        <li data-index="127">01.09.1988</li>
+        <li data-index="128">01.09.1988 a 08.09.1988</li>
+        <li data-index="129">07.09.1988</li>
+        <li data-index="130">11.09.1988 a 17.09.1988</li>
+        <li data-index="131">17.09.1988</li>
+        <li data-index="135">18.09.1988 a 11.10.1988</li>
+        <li data-index="136">21.09.1988 a 11.10.1988</li>
+        <li data-index="137">11.10.1988</li>
+        <li data-index="138">12.10.1988</li>
+        <li data-index="139">12.10.1988 a 10.12.1988</li>
+        <li data-index="140">11.12.1988</li>
+        <li data-index="142">12.12.1988</li>
+        <li data-index="143">12.12.1988 a 24.12.1988</li>
+        <li data-index="144">25.12.1988</li>
+        <li data-index="146">27.12.1988</li>
+        <li data-index="147">31.12.1988</li>
+        <li data-index="148">01.01.1989</li>
+        <li data-index="149">01.01.1989 a 19.03.1989</li>
+        <li data-index="150">19.03.1989</li>
+        <li data-index="152">20.03.1989 a 20.04.1989</li>
+        <li data-index="153">20.04.1989</li>
+        <li data-index="154">21.04.1989</li>
+        <li data-index="155">20.05.1989</li>
+        <li data-index="156">05.06.1989</li>
+        <li data-index="157">07.06.1989</li>
+        <li data-index="158">07.06.1989</li>
+        <li data-index="159">10.08.1989</li>
+        <li data-index="160">15.08.1989 a 16.11.1989</li>
+        <li data-index="161">16.11.1989</li>
+        <li data-index="162">16.11.1989 a 18.02.1989</li>
+        <li data-index="163">03.03.1990</li>
+        <li data-index="164">05.03.1990</li>
+        <li data-index="165">10.03.1990</li>
+        <li data-index="171">10.03.1990 a 16.03.1990</li>
+        <li data-index="172">14.03.1990</li>
+        <li data-index="173">16.03.1990</li>
+        <li data-index="176">17.03.1990</li>
+        <li data-index="178">17.03.1990 a 20.03.1990</li>
+        <li data-index="179">20.03.1990</li>
+        <li data-index="181">21.03.1990</li>
+        <li data-index="182">21.03.1990 a 25.03.1990</li>
+        <li data-index="183">26.03.1990</li>
+        <li data-index="184">27.03.1990</li>
+        <li data-index="185">29.03.1990</li>  
+        <li data-index="186">21.03.2021</li>    
+        <li data-index="187">FIN</li> 
+      </ul>
+    </div>
+    <div class="content" id="content-area">
+      <div class="arrow-wrapper-top">
+        <button id="prev" class="nav-arrow">▲</button>
+      </div>
+      <div id="events">
+        <div class="event active"><label=“0”>
+          <h2>Enero de 1893</h2>
+          <h3>Nacimiento de Nana</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_caab4974b53046e8ac3ea1de0ae91ea4~mv2.jpg">
+          <p>El nacimiento de Nana me parece un buen momento para empezar esta línea del tiempo. De hecho, su historia forma parte de la primera nota que tomé en mi Moleskine y, en ella, podéis ver la cicatriz que más tarde describirá Don.<br>Por mucho que he intentado descifrar el origen de la instantánea, no lo he logrado, la verdad. Es uno de aquellos datos que pierdo y que, a pesar de la rabia que me genera, no soy capaz de recuperar ni con una búsqueda en internet. Aquí tenéis la foto original que tomé con el teléfono (de un libro, una revista…) y la captura de la primera página de mis notas para la novela.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_1c134fb8d614481bb946fb14f7980f7d~mv2.jpg">
+        </div>
+        <div class="event"> <label=“1”>
+          <h2>1 de enero de 1900</h2>
+          <h3>Nace Seiki</h3>
+          <p>Después de cuarenta y cuatro semanas de embarazo, nace Seiki (aunque quizás haya exagerado un poco la realidad, como suele).</p>
+        </div>
+        <div class="event"> <label=“2”>
+          <h2>Octubre de 1907</h2>
+          <h3>Crisis de 1907</h3>
+	        <p>Durante esta crisis, la familia de Nana perdieron el dinero que tenían y perdieron el estatus económico. Solo les quedó el nombre, reverenciado como uno de los colonos del Mayflower.</p>
+          <p><a href="https://es.wikipedia.org/wiki/P%C3%A1nico_financiero_de_1907" target="_blank">Más sobre el pánico financiero de 1907</a></p>
+        </div>
+        <div class="event"> <label=“3”>
+          <h2>Febrero de 1908</h2>
+          <h3>La familia se muda a Brooklyn</h3>
+          <p>Una vez perdido el dinero, la familia se muda a la casa de Brooklyn, donde se vivirá toda la saga familiar.</p>
+        </div>
+        <div class="event"> <label=“4”>
+          <h2>Abril de 1908</h2>
+          <h3>Nana se casa</h3>
+          <p>Sin ningún medio económico superviviente, la familia casa a Nana con Fred, el iletrado.</p>
+        </div>
+    		<div class="event"> <label=“5”>
+          <h2>De abril de 1908 a marzo de 1917</h2>
+          <h3>Nana trata de quedarse embarazada</h3>
+        </div>
+        <div class="event"> <label=“6”>
+          <h2>24 de marzo de 1905</h2>
+          <h3>Muere el padre biológico de Seiki</h3>
+        </div>
+        <div class="event"> <label=“7”>
+          <h2>25 de marzo de 1905</h2>
+          <h3>Seiki empieza a trabajar en la factoría</h3>
+        </div>
+        <div class="event"> <label=“8”>
+          <h2>26 de marzo de 1905</h2>
+          <h3>Madre de Seiki se casa en segundas nupcias con el capataz</h3>
+        </div>
+        <div class="event"> <label=“9”>
+          <h2>1913</h2>
+          <h3>Se captura la instantánea familiar que Seiki enseñará a Don mucho más tarde</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_a49f219d176c4a1596c2018b93df347d~mv2.jpg">
+	        <p>Aquí arriba está la foto original que tomé como referencia para la descripción de la instantánea de la infancia de Seiki.<br>Como podéis observar, he cambiado a la criada por el padrastro de Seiki, pero el resto se mantiene imperturbable.<br> Abajo, una instantánea del tipo de ropa que se vestía en la época, en este caso, de París, que utilicé para hacerme una idea de todo lo que rodeaba al dinero en aquellos tiempos.</p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_bd75d15da3214f508f4897df1bb733e2~mv2.jpg">
+        </div>
+        <div class="event"> <label=“10”>
+          <h2>Del 19 de junio de 1914 al 11 de noviembre de 1918</h2>
+          <h3>Primera Guerra Mundial</h3>
+	        <p><a href="https://es.wikipedia.org/wiki/Primera_Guerra_Mundial" target="_blank">Más sobre la Gran Guerra</a></p>
+        </div>
+        <div class="event"> <label=“11”>
+          <h2>De 1914 a 1940</h2>
+          <h3>US Radium pinta esferas fluorescentes con radio</h3>
+	        <p>A pesar del caso de Grace Fryer, que fue en los años 20, lo único que cambió para la compañía fue que movieron su sede, pero siguieron pintando esferas de la misma forma en que lo hacían antes, sin importarles la salud de sus empleadas.<br>Aquí abajo, podéis ver un par de anuncios del Undark, que era el nombre comercial de la pintura que usaban y una foto de cómo se chupaban los pinceles con radio para más precisión.</p>
+	      <img src="https://static.wixstatic.com/media/f2a4bb_7916da07aa57490492bd872a43343a46~mv2.jpg">
+	      <p style="text-align: center;"><img src="https://static.wixstatic.com/media/f2a4bb_3c09347a10aa4e3ab00654e8f546c4e6~mv2.jpg"></p>
+          <p><a href="https://en.wikipedia.org/wiki/Undark" target="_blank">Más sobre Undark</a></p>
+        </div>
+        <div class="event"> <label=“12”>
+          <h2>1 de enero de 1915</h2>
+          <h3>Seiki se alista</h3>
+	      <p>Seiki miente con su edad para huir de la situación, cada vez más difícil, en casa con su padrastro.<br>Seiki deja a su familia para ir a la guerra, de la cual, la mayoría de información, proviene de <i>A war in words</i> de Svetlana Palmer.</p>
+	      <p style="text-align: center;"><img src="https://static.wixstatic.com/media/f2a4bb_ead56efa17354e1a92d458078df85549~mv2.jpg" style="width: 50%;"></p>
+	      <p>Un libro que, de forma completamente azarosa, encontré en un punto de intercambio de libros del hotel en el que pasé mis vacaciones veraniegas y que relata la historia de la Primera Guerra Mundial a través de cartas y diarios. Como podéis imaginar, me maravilló el descubrimiento.</p>
+        </div>
+        <div class="event"> <label=“13”>
+          <h2>1915</h2>
+          <h3>Muere la hermana de Seiki</h3>
+	        <p>Por causas que Seiki nunca confiesa, muere su hermana.</p>
+        </div>
+        <div class="event"> <label=“14”>
+          <h2>Abril de 1915</h2>
+          <h3>La biblia salvadora</h3>
+	      <p>Estando en las trincheras, Seiki observa cómo una biblia salva a un soldado y decide desertar.<br>Os imaginaréis que me lo he inventado, ya que parece sacado de una película de acción (de las malas), pero no. Aquí tenéis la foto titulada «Biblia salvadora», tomada en 1917.</p>
+	      <img src="https://static.wixstatic.com/media/f2a4bb_09a73ad908f947a6b5762318baa42e23~mv2.jpg">
+          <p>Además, aprovechando la imagen de la biblia, Seiki se decide y aprovecha la primera oportunidad para desertar.</p>
+        </div>
+        <div class="event"> <label=“16”>
+          <h2>Mayo de 1915</h2>
+          <h3>Seiki llega a Nueva York</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_eb973b4bfe634ef8b7f9448c93d39e8b~mv2.jpg">
+	        <p>Seiki llega a los muelles de Chelsea, antes de ser trasladado a la isla de Ellis para la inspección.<br>La descripción de los Chelsea docks está sacada de fotos como la que tenéis arriba.</p>
+          <h3>Seikiewicz se convierte en Seiki</h3>
+	      <p>La ineptitud del funcionario de Ellis Island, convierte el apellido familiar húngaro en la adaptación «Seiki».<br>En este caso, el mito de que los funcionarios cambiaban los nombres a los inmigrantes, es eso: un mito. Por mucho que crean que fue real, no lo fue. Así que, en esta ocasión, me aprovecho de una ficción enraizada, de una leyenda popular, para crear la mía propia.</p>
+          <h3>El Nueva York de las maravillas</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_3d926481da33407e8d1bef9c2cefb025~mv2.jpg">
+          <img src="https://static.wixstatic.com/media/f2a4bb_6bc31b056e1c4845a7fd842c952043f9~mv2.webp">
+	        <p>Seiki describe el Nueva York como «el de las maravillas» y tiene una razón de ser.<br>Por si no os habéis dado cuenta todavía, me apasiona encontrar historias extrañas, fotos llamativas y momentos que supongan un cambio de paradigma de lo que cuento en mis relatos y novelas. Ejemplo de eso es todo lo que quería expresar del Nueva York que se encontró Seiki cuando emigró desde Europa y todo lo que digo en el texto en que describe las maravillas de la ciudad, la sorpresa y lo extraordinario de sus calles, es cierto.</p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_75213d290ede409fb0f8362e8b690fd9~mv2.jpeg">
+	        <img src="https://static.wixstatic.com/media/f2a4bb_84513ef200f84672ad0c04117e8e3790~mv2.jpeg">
+	        <img src="https://static.wixstatic.com/media/f2a4bb_a8e9af88ee18465c89450bf450a5a077~mv2.jpg">
+	        <p>(Aunque algunas de las escenas fueran de Londres, como estas tres últimas…</p>
+          <h3>Campo de trigo en Manhattan</h3>
+	      <p>Siguiendo con la «adaptación» de algunas fotos anteriores, por si fuera poco, la historia del campo de trigo la he movido en el tiempo, porque me parecía fascinante.<br>En realidad, el campo de trigo en Manhattan, fue una obra de arte de la artista Agnes Denes, y sucedió en 1982. Sin embargo, encajaba tan bien con la visión de Seiki, que no pude resistir la tentación. Aquí tenéis dos fotos y el enlace a una noticia donde se explica la historia.</p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_851319017b1644fab20c70cd448e4a64~mv2.jpeg">
+	        <img src="https://static.wixstatic.com/media/f2a4bb_05722217bdab461fab8fc70a7867bbcc~mv2.jpg">
+          <p><a href="https://chiquitaroom.com/un-campo-de-trigo-en-manhattan-2/" target="_blank">Artículo con más información</a></p>
+          <h3>Seiki se toma foto tras cartón</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_0744cc32a9fd43beaaae53edc2f6b2dc~mv2.jpg">
+	        <p>Esta es una de aquellas cosas que parecen inventadas, pero que no lo son.<br>Leyendo sobre la pobreza en Estados Unidos en la época de la Depresión, un hecho me pareció muy relevante para entender la falta de recursos. Hablar de comida o dinero me parecía que era lo típico, pero cuando encontré la historia de los jóvenes que se hacían fotos ante un cartón donde había dibujado un traje, supe que había encontrado la metáfora perfecta. La foto, la tenéis arriba.</p>
+        </div>
+        <div class="event"> <label=“21”>
+          <h2>De mayo de 1915 a agosto de 1915</h2>
+          <h3>Seiki en la miseria</h3>
+	        <p>El tipo de vida sin dinero de Seiki está basado en historias reales de diversas fuentes.<br>Y todo lo relacionado con la vida cerca del puerto está sacado de <i>Waterfront</i> de Philip Lopate.</p>
+	        <p style="text-align: center;"><img src="https://static.wixstatic.com/media/f2a4bb_24dcea5acab6444a946a511f4d00e252~mv2.jpg" style="width: 50%;"></p>
+        </div>
+        <div class="event"> <label=“22”>
+          <h2>Del 1 de septiembre de 1915 al 30 de diciembre de 1919</h2>
+          <h3>Seiki trabaja de estibador</h3>
+	      <p>Una vez Seiki encuentra trabajo —y no gracias a la foto tras un cartón pintado— aprovecho el Telizsalami (que probé porque una compañera de trabajo húngara me trajo) y la historia real de cómo vivían y trabajaban los estibadores en la época.<br>Sobre el embutido, os dejo un poco de información a modo de enlace, y sobre los estibadores, toda la información la saqué de <i>The longshoremen</i>, escrito por Charles Brinton Barnes </p>
+	        <p style="text-align: center;"><https://static.wixstatic.com/media/f2a4bb_b85fac1cece54606acc1d1f2a8315cec~mv2.jpg" style="width: 50%;"></p>
+        </div>
+        <div class="event"> <label=“23”>
+          <h2>Diciembre de 1917</h2>
+          <h3>Nace la abuela Ruth</h3>
+        </div>
+        <div class="event"> <label=“24”>
+          <h2>Del 22 de septiembre de 1919 al 8 de enero de 1920</h2>
+          <h3>Huelga general de 1919</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Huelga_del_acero_de_1919#:~:text=La%20huelga%20del%20acero%20de,8%20de%20enero%20de%201920" target="_blank">Más sobre la hulega</a></p>
+        </div>
+        <div class="event"> <label=“25”>
+          <h2>30 de diciembre de 1919</h2>
+          <h3>Seiki se hace con el control de la empresa de estibadores</h3>
+        </div>
+        <div class="event"> <label=“26”>
+          <h2>De 1920 a 1927</h2>
+          <h3>Proceso legal de Grace Fryer contra la U.S. Radium Corporation</h3>
+		      <p>Durante gran parte de la composición de notas e ideas de la novela, las razones de la muerte de la abuela de Don y de la huida de Seiki eran un gran vacío. No encontraba nada que cuadrara, nada que encajara, porque sabía que tenía que ver con la radiación, pero quería salirme de los tópicos. Si alguien la envenenaba, me acercaba demasiado a mi parte de escritor de novela negra. Si buscaba algún tipo de complot, la novela se convertía con rapidez en una de espías o de misterio. Nada parecía encajar con el resto de la trama. Ni con mis pretensiones.<br>Hasta que Antoni Béjar, conserje del colegio donde trabajo, me pasó —como suele— una serie de enlaces de documentales que le parecieron interesantes. Uno de ellos, explicaba la historia de las Radium Girls, que yo no conocía, y todo encajó en mi mente. Sin él, esta novela habría sido otra y por eso está en la parte de las dedicatorias.<br>Os dejo aquí el enlace original y algunas fotos de las secuelas que tuvieron las chicas del radio. En esta parte, todo es verídico. Todo, excepto que la abuela de Don trabajara allí, aunque muchas trabajadoras de la empresa murieron en el parto, como ella, porque se les rompió la pelvis por sus secuelas y se desangraron.</p>
+		      <img src="https://static.wixstatic.com/media/f2a4bb_5918a71d605a46ce876ac634f76ad667~mv2.webp">
+		      <img src="https://static.wixstatic.com/media/f2a4bb_e1dcfa21a52c437aa09f6edb45da29ca~mv2.webp">
+		      <img src="hhttps://static.wixstatic.com/media/f2a4bb_ed8d84e0a58748f4b731be9c82a78882~mv2.webp">
+		      <div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/5KoBPHfEveA?si=Xb-jZKxrmbiEeC0x" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+        </div>
+        <div class="event"> <label=“27”>
+          <h2>1924</h2>
+          <h3>Empieza a comercializarse la regaliz Zara en barras</h3>
+	        <p>Me encanta la regaliz Zara (dura) y me cuadraba tanto con la historia final de Don, que la metí porque sí.<br>Tenéis fotos del embalaje original y del vaso que resta en mi despacho, esperando a ser vaciado.</p>
+	      <img src="https://static.wixstatic.com/media/f2a4bb_b19cdc961454461fa9a764aad4495b26~mv2.jpg">
+	      <img src="https://static.wixstatic.com/media/f2a4bb_a150f8ec89a94a508f2a7ffdc89f417f~mv2.jpg">
+        </div>
+        <div class="event"> <label=“28”>
+          <h2>Diciembre de 1928</h2>
+          <h3>Seiki monta su empresa en Japón</h3>
+        </div>
+        <div class="event"> <label=“29”>
+          <h2>Febrero de 1929</h2>
+          <h3>Seiki conoce a Yaeko</h3>
+        </div>
+        <div class="event"> <label=“30”>
+          <h2>Septiembre de 1929</h2>
+          <h3>Seiki y Yaeko se casan</h3>
+        </div>
+        <div class="event"> <label=“31”>
+          <h2>1930</h2>
+          <h3>Seiki compra los Hudson View Gardens</h3>
+	      <p>Hudson View Gardens es un complejo de apartamentos cooperativos ubicado en las avenidas Pinehurst y Cabrini, cerca de las calles 183 y 185 Oeste, en la subzona de Hudson Heights, dentro del vecindario de Washington Heights en Manhattan.<br>El complejo tiene vistas al río Hudson al oeste y al Parque Bennett —que incluye el punto natural más alto de Manhattan— al este. Fue construido como una cooperativa de viviendas entre 1923 y 1925.<br>En 2016 fue incluido en el Registro Nacional de Lugares Históricos.</p>
+	      <img src="https://static.wixstatic.com/media/f2a4bb_d3a21e646a2d4df1a571c7ddb5e22939~mv2.jpg">
+        </div>
+        <div class="event"> <label=“32”>
+          <h2>Diciembre de 1930</h2>
+          <h3>La abuela Ruth empieza a trabajar con el radio</h3>
+        </div>
+        <div class="event"> <label=“33”>
+          <h2>13 de mayo de 1931</h2>
+          <h3>Nace el tío Paul</h3>
+        </div>
+        <div class="event"> <label=“34”>
+          <h2>17 de junio de 1934</h2>
+          <h3>Nace la tía Adela</h3>
+        </div>
+        <div class="event"> <label=“36”>
+          <h2>23 de noviembre de 1936</h2>
+          <h3>Primer ejemplar de la revista LIFE basada en el fotoperiodismo</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_0f3ccf9d897943f4b21e77b801daf552~mv2.jpg">
+	      <p>El texto que podía leerse anunciando el nuevo formato de la revista es el siguiente: «Esta semana, los suscriptores inaugurales y los compradores en quioscos tuvieron su primer vistazo a LIFE, la nueva revista semanal de imágenes publicada por Time Inc. La promoción preliminar había prometido que LIFE ofrecería “el paquete de fotografías más grande y mejor que sea posible producir a un precio popular.” Por 10 centavos, los primeros lectores podían juzgar cómo la nueva revista había cumplido con estas especificaciones mientras hojeaban las 96 grandes páginas (de 14 pulgadas por 10⅝ pulgadas) con las que LIFE comenzó su carrera fotográfica.»</p>
+	      <img src="https://static.wixstatic.com/media/f2a4bb_8ed344562bd640daa90bc29272d13967~mv2.jpeg">
+          <p><a href="https://time.com/archive/6756233/press-life-launched/" target="_blank">Texto en inglés sobre la salida del nuevo formato</a></p>
+        </div>
+        <div class="event"> <label=“35”>
+          <h2>25 de noviembre de 1936</h2>
+          <h3>Pacto Antikomintern</h3>
+	      <p>El Pacto Antikomintern o Tratado Antikomintern, oficialmente Acuerdo contra la Internacional Comunista, fue firmado el 25 de noviembre de 1936 entre el Imperio del Japón y la Alemania nazi, siendo el documento relanzado y de nuevo firmado el 25 de noviembre de 1941, tras la invasión de la URSS por Alemania. En el documento, las naciones firmantes se comprometían a tomar medidas para salvaguardarse de la amenaza de la Internacional Comunista o Komintern, liderada por la Unión Soviética.</p>
+        </div>
+        <div class="event"> <label=“37”>
+          <h2>1937</h2>
+          <h3>Muere la madre del tío Paul y este se instala con Nana</h3>
+        </div>
+        <div class="event"> <label=“38”>
+          <h2>1940</h2>
+          <h3>Nace Margaret, madre de Don y, en el parto, muere Ruth por las secuelas de la radiación</h3>
+        </div>
+        <div class="event"> <label=“40”>
+          <h2>6 de diciembre de 1941</h2>
+          <h3>Llaman a Seiki a una reunión en el ministerio</h3>
+        </div>
+        <div class="event"> <label=“41”>
+          <h2>7 de diciembre de 1941</h2>
+          <h3>Ataque a Pearl Harbor</h3>
+            <p>El ataque a Pearl Harbor fue una ofensiva militar sorpresa efectuada por la Armada Imperial Japonesa contra la base naval de los Estados Unidos en Pearl Harbor (Hawái) en la mañana del domingo 7 de diciembre de 1941.</p>
+        </div>
+        <div class="event"> <label=“42”>
+          <h2>1943</h2>
+          <h3>Nace la tía Edith (es tía real de Don por parte del abuelo Fred)</h3>
+        </div>
+        <div class="event"> <label=“43”>
+          <h2>6 de agosto de 1945</h2>
+          <h3>Bombardeo atómico de Hiroshima</h3>
+          <p>Toda la información acerca de la Bomba Atómica en Hiroshima, incluidos los encuentros y sucesos, así como el hecho que hubiera supervivientes que se marcharan a Ninoshima o que hubiera personas que se salvaron de la explosión inicial por estar en un centro comercial, son verídicos.<br>La gran mayoría de ellos están sacados del excelente <i>Diario de Hiroshima (de un médico japonés)</i> por Michihiko Hachiya. También encontré por azar el volumen, justo cuando empezaba a documentar esta parte de la novela y fue un gran hallazgo importante a la hora, no solo de ser fiel a la realidad de un evento como ese, sino de dotar de dramatismo a la llegada de Seiki a la ciudad la mañana de la bomba.</p>
+          <p style="text-align: center;"><img src="https://static.wixstatic.com/media/f2a4bb_1083ad04d5e845e897d21bab3ac8289a~mv2.jpeg" style="width: 50%;"></p>
+        </div>
+        <div class="event"> <label=“44”>
+          <h2>1 de septiembre de 1945</h2>
+          <h3> Muere Yaeko tras una larga agonía por los efectos de la radiación</h3>
+	        <p>En este caso, estuve investigando sobre los efectos reales de una bomba como la de Hiroshima para tratar, como siempre, de ser lo más fiel a la realidad posible.<br>A continuación tenéis una captura de mi biblia, con el rango de radiación y el cuadro de efectos que causa en el cuerpo. </p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_8893ec03073c496faf4158ec3b1e411a~mv2.png">
+        </div>
+        <div class="event"> <label=“45”>
+          <h2>Del 1 de septiembre de 1945 al 2 de julio de 1946</h2>
+          <h3>Seiki lucha por el permiso para dejar Japón</h3>
+        </div>
+        <div class="event"> <label=“46”>
+          <h2>15 de julio de 1946</h2>
+          <h3>Seiki llega a Inglaterra</h3>
+        </div>
+        <div class="event"> <label=“47”>
+          <h2>Del 15 de julio de 1946 al 30 de diciembre de 1947</h2>
+          <h3>Seiki pasa los días sin más, pero no se atreve a suicidarse, quizás por su egocentrismo.</h3>
+        </div>
+        <div class="event"> <label=“48”>
+          <h2>Del 1 de enero al 28 de julio de 1948</h2>
+          <h3>Seiki ayuda en la organización de los «juegos» de Stoke Mandeville</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Juegos_Mundiales_IWAS" target="_blank">Un poco más de información acerca de los Juegos IWAS</a></p>
+        </div>
+        <div class="event"> <label=“49”>
+          <h2>1949</h2>
+          <h3>Nace el hijo del tío Paul</h3>
+        </div>
+        <div class="event"> <label=“50”>
+          <h2>1950</h2>
+          <h3>Productos hechos con radio en el día a día</h3>
+	        <p>En la época, no era raro encontrar productos radioactivos en las tiendas, como se puede ver en el libro <i>Retronaut</i> de Chris Wild</p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_54dc0c885b1745a3ab6d825146e7a559~mv2.jpg">
+        </div>
+        <div class="event"> <label=“51”>
+          <h2>Del 25 de junio de 1950 al 27 de julio de 1953</h2>
+          <h3>Guerra de Corea</h3>
+	        <p>Es la guerra que, al inicio de su diario, el tío Paul, joven, ensalza.</p>
+        </div>
+        <div class="event"> <label=“52”>
+          <h2>Julio de 1950</h2>
+          <h3>La tía Adela, con solo 16 años, se casa con Billy, que se va a Corea</h3>
+        </div>
+        <div class="event"> <label=“53”>
+          <h2>Enero de 1951</h2>
+          <h3>Muere Billy y tía Adela se levanta con el pelo blanco</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Guerra_de_Corea" target="_blank">Más sobre la guerra de Corea</a></p>
+        </div>
+        <div class="event"> <label=“54”>
+          <h2>De 1955 a 1975</h2>
+          <h3>Guerra de Vietnam</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Guerra_de_Vietnam" target="_blank">Más sobre la guerra de Vietnam</a></p>
+        </div>
+        <div class="event"> <label=“55”>
+          <h2>10 de septiembre de 1960</h2>
+          <h3>Adebe Bikilia gana la maratón de Roma descalzo</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_cf7f9d9c522741f983e58d6881d53d62~mv2.jpeg">
+        </div>
+        <div class="event"> <label=“56”>
+          <h2>Del 19 al 24 de septiembre de 1960</h2>
+          <h3>I Juegos Paralímpicos Roma 1960</h3>
+        </div>
+        <div class="event"> <label=“57”>
+          <h2>5 de febrero de 1963</h2>
+          <h3>Discurso de JFK acerca de la salud mental y el retraso mental</h3>
+          <p><a href="https://www.presidency.ucsb.edu/documents/special-message-the-congress-mental-illness-and-mental-retardation" target="_blank">Si queréis leerlo, lo encontrareis aquí, en ingles</a></p>
+        </div>
+        <div class="event"> <label=“58”>
+          <h2>1967</h2>
+          <h3>Muere el hijo del tío Paul en Vietnam</h3>
+        </div>
+        <div class="event"> <label=“59”>
+          <h2>13 de enero de 1969</h2>
+          <h3>Nace James, hermano de Don</h3>
+        </div>
+        <div class="event"> <label=“60”>
+          <h2>14 de enero de 1969 al 1 de marzo de 1990</h2>
+          <h3>James ingresado en centro</h3>
+        </div>
+        <div class="event"> <label=“61”>
+          <h2>14 de enero de 1969 al 15 de noviembre de 1968</h2>
+          <h3>Depresión Margaret por ingreso de James</h3>
+        </div>
+        <div class="event"> <label=“62”>
+          <h2>Del 4 al 13 de noviembre de 1968</h2>
+          <h3>III Juegos Paralímpicos en Tel Aviv</h3>
+        </div>
+        <div class="event"> <label=“63”>
+          <h2>13 de noviembre de 1968</h2>
+          <h3>Terminados los juegos, Seiki decide no ir a Alemania a los siguientes</h3>
+        </div>
+        <div class="event"> <label=“64”>
+          <h2>14 de noviembre de 1968</h2>
+          <h3>Seiki vuelve a EUA</h3>
+	        <p>Odia lo que se encuentra en el país y decide terminar con su vida.</p>
+        </div>
+        <div class="event"> <label=“65”>
+          <h2>15 de noviembre de 1968</h2>
+          <h3>Encuentro Seiki y Margaret en el puente</h3>
+        </div>
+        <div class="event"> <label=“66”>
+          <h2>Del 16 de noviembre de 1968 al 1 de febrero de 1969</h2>
+          <h3>Romance entre Seiki y Margaret</h3>
+        </div>
+        <div class="event"> <label=“67”>
+          <h2>3 de febrero de 1969</h2>
+          <h3>Seiki abandona a Margaret</h3>
+	        <p>Al pagar la hipoteca de la casa familiar de Brooklyn a cambio de la historia familiar, Seiki descubre la relación de la madre de Margaret con la radiación y huye para no revivir lo que sucedió con Yaeko.</p>
+        </div>
+        <div class="event"> <label=“68”>
+          <h2>Marzo de 1969</h2>
+          <h3>Seiki funda Queensland Hall</h3>
+	        <p>Investigando sobre salud mental, me topé con Kingsley Hall, un lugar real, que trató aspectos de salud mental, con métodos innovadores, durante el siglo XX, en el que se alojó Gandhi durante su estancia en Londres. Mi Queensland Hall está basado casi enteramente en este, aunque lo he ficcionado para que mi historia cuadrara un poco mejor…</p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_1df25f7cd5ca487fa2bccc56d54a495c~mv2.jpg">
+          <p><a href="https://lamenteesmaravillosa.com/la-fascinante-historia-del-kingsley-hall-el-templo-de-la-antipsiquiatria/" target="_blank">Más información sobre el Kingsley Hall real</a></p>
+        </div>
+        <div class="event"> <label=“69”>
+          <h2>15 de noviembre de 1969</h2>
+          <h3>Nace Don el mismo día de la marcha de la moratoria</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_c7409d0a94904aa5bfccadb199692870~mv2.avif">
+	        <p>El tío Paul se pierde el nacimiento de Don por estar cubriendo las manifestaciones. No sabemos si la muerte de su hijo en los inicios de Vietnam son los que lo convierten en activista o su propia evolución personal.</p>
+          <p><a href="https://es.wikipedia.org/wiki/Protestas_contra_la_guerra_de_Vietnam" target="_blank"> Un poco de información acerca de todas las protestas contra la guerra de Vietnam</a></p>
+        </div>
+        <div class="event"> <label=“71”>
+          <h2>Del 15 de marzo al 13 de septiembre de 1970</h2>
+          <h3>Exposición Universal de Osaka</h3>
+        </div>
+        <div class="event"> <label=“72”>
+          <h2>Mayo de 1972</h2>
+          <h3>Don tiene fiebre alta y lo llevan al hospital</h3>
+	        <p>Como bien dice Margaret en el texto, desde ese día, aprendió a jugar solo. Podríamos marcar este momento, como el nacimiento real de Ron.</p>
+        </div>
+        <div class="event"> <label=“73”>
+          <h2>1975</h2>
+          <h3>Visita nocturna de Margaret recordando la anterior</h3>
+        </div>
+        <div class="event"> <label=“74”>
+          <h2>19 de octubre de 1977</h2>
+          <h3>Primer aterrizaje del Concorde (en pruebas) en Nueva York</h3>
+          <p><a href="https://elpais.com/diario/1977/10/20/internacional/246150010_850215.html?event=go&event_log=go&prod=REGCRART&o=cerrado" target="_blank">Noticia del País acerca de la llegada</a></p>
+          <p><a href="https://es.wikipedia.org/wiki/Concorde" target="_blank">Más información sobre el Concorde</a></p>
+          <p>Durante el viaje escuchan <i>Raindrops keep falling in my head</i>, de Burt Bacharach, publicada al 1969. Podéis escucharla a continuación.</p>
+          <div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/sySlY1XKlhM?si=N-rsQ764Re-ytTV-" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+        </div>
+        <div class="event"> <label=“75”>
+          <h2>Agosto de 1978</h2>
+          <h3>Margaret visita a James</h3>
+        </div>
+        <div class="event"> <label=“76”>
+          <h2>Septiembre de 1978</h2>
+          <h3>Intento de suicidio de Margaret</h3>
+        </div>
+        <div class="event"> <label=“77”>
+          <h2>Del 1 de septiembre de 1978 al 3 de septiembre de 1982</h2>
+          <h3>Internamiento de Margaret</h3>
+        </div>
+        <div class="event"> <label=“78”>
+          <h2>De 1979 a 1982</h2>
+          <h3>Guerra Civil salvadoreña</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Guerra_civil_de_El_Salvador" target="_blank">Mas información sobre los ataques</a></p>
+        </div>
+        <div class="event"> <label=“79”>
+          <h2>Del 20 de enero de 1981 al 21 de enero de 1989</h2>
+          <h3>Presidencia de Ronald Reagan</h3>
+        </div>
+        <div class="event"> <label=“80”>
+          <h2>Del 24 al 26 de diciembre de 1981</h2>
+          <h3>Margaret vuelve a casa por Navidad</h3>
+        </div>
+        <div class="event"> <label=“81”>
+          <h2>1982</h2>
+          <h3>El año del cementerio</h3>
+        </div>
+        <div class="event"> <label=“82”>
+          <h2>Marzo de 1982</h2>
+          <h3>Don visita a Margaret en el manicomio</h3>
+        </div>
+        <div class="event"> <label=“83”>
+          <h2>Mayo de 1982</h2>
+          <h3>Muere la tía Adela</h3>
+        </div>
+        <div class="event"> <label=“84”>
+          <h2>1 de septiembre de 1982</h2>
+          <h3>Muere Nana</h3>
+        </div>
+        <div class="event"> <label=“85”>
+          <h2>3 de septiembre de 1982</h2>
+          <h3>Sepelio de Nana y suicidio de Margaret en el manicomio</h3>
+        </div>
+        <div class="event"> <label=“87”>
+          <h2>4 de septiembre de 1982</h2>
+          <h3>Discusión entre la tía Edith y el tío Paul por el futuro de Don</h3>
+        </div>
+        <div class="event"> <label=“88”>
+          <h2>5 de septiembre de 1982</h2>
+          <h3>Traslado a Sacramento</h3>
+	        <p>Cuando aterriza en Los Angeles, Don piensa en <i>California Dreamin’</i> de The Mamas & The Papas, publicada el 1965. Podéis escucharla a continuación.</p>
+	        <div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/N-aK6JnyFmk?si=vw6QWe3iPpk_19NZ" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+        </div>
+        <div class="event"> <label=“89”>
+          <h2>10 de diciembre de 1982</h2>
+          <h3>Ensayo roast beef por parte de la tía Edith</h3>
+        </div>
+        <div class="event"> <label=“90”>
+          <h2>2 de enero de 1983</h2>
+          <h3>Richard abandona a la tía Edith</h3>
+        </div>
+        <div class="event"> <label=“91”>
+          <h2>3 de enero de 1983</h2>
+          <h3>Don se muda con el tío Paul y ve la foto de la niña en una fábrica</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_1e8f3af2ba164d5898e9e96b82e512ee~mv2.jpg">
+	        <p>La foto que inspiro al tío Paul a convertirse en fotógrafo, ha cambiado en diversas ocasiones. No la temática, pero sí la foto en sí.<br>En la primera versión, tenía archivada la foto de arriba y, en la versión definitiva, prefería imaginarme la de abajo, porque me parecía que explicaba mucho mejor el carácter que quería imprimir a la escena. Al final, siempre he creído que son pequeñas cosas que el lector no sabe, pero que se notan en el texto.</p>
+	        <img src="https://static.wixstatic.com/media/f2a4bb_4d9fcfd7585444999a0c40227fc4bb85~mv2.jpg">
+          <h3>Visita a la tumba de Margaret</h3>          
+          <p><a href="https://www.green-wood.com/history/" target="_blank">Un poco de historia del cementerio</a></p>
+        </div>
+        <div class="event"> <label=“94”>
+          <h2>De enero de 1983 a septiembre de 1987</h2>
+          <h3>Los años felices con el tío Paul</h3>
+        </div>
+        <div class="event"> <label=“95”>
+          <h2>Del 23 de enero de 1983 al 8 de marzo de 1987</h2>
+          <h3>Emisión del <i>Equipo A</i></h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_afd910197bc64885bd2cada84af437c7~mv2.webp">
+          <p><a href="https://es.wikipedia.org/wiki/The_A-Team" target="_blank">Sobre la serie</a></p>
+        </div>
+        <div class="event"> <label=“96”>
+          <h2>15 de junio de 1983</h2>
+          <h3>Ron empieza a teclear a máquina y Don empieza a trabajar con el tío Paul</h3>
+        </div>
+        <div class="event"> <label=“98”>
+          <h2>Julio de 1983</h2>
+          <h3>Coney Island con el tío Paul</h3>
+        </div>
+        <div class="event"> <label=“99”>
+          <h2>9 de junio de 1984</h2>
+          <h3>Estreno de <i>Los cazafantasmas</i></h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_949f61bae74841cd98096c166742e76a~mv2.jpg">
+          <p><a href="https://es.wikipedia.org/wiki/Los_cazafantasmas" target="_blank">Sobre la peli</a></p>
+        </div>
+        <div class="event"> <label=“100”>
+          <h2>31 de octubre de 1984</h2>
+          <h3>Asesinato de Indira Gandhi</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Asesinato_de_Indira_Gandhi" target="_blank">Acerca del asesinato de Indira Gandhi</a></p>
+        </div>
+        <div class="event"> <label=“101”>
+          <h2>1985</h2>
+          <h3>Descubrimiento en la Antártida del agujero de la capa de ozono</h3>
+        </div>
+        <div class="event"> <label=“102”>
+          <h2>3 de julio de 1985</h2>
+          <h3>Estreno de <i>Regreso al Futuro</i></h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_f39d36adb5114f4a8be5d5e909db957e~mv2.jpg">
+          <p><a href="https://es.wikipedia.org/wiki/Back_to_the_Future" target="_blank">Más sobre la peli</a></p>
+        </div>
+        <div class="event"> <label=“103”>
+          <h2>27 de agosto de 1985</h2>
+          <h3>Golpe de estado en Nigeria</h3
+          <p><a href="https://es.wikipedia.org/wiki/Golpe_de_Estado_en_Nigeria_de_1985" target="_blank">Información sobre el Golpe</a></p>
+        </div>
+        <div class="event"> <label=“104”>
+          <h2>27 de diciembre de 1985</h2>
+          <h3>Atentados en los aeropuertos de Roma y Viena</h3>
+          <p><a href="https://en-m-wikipedia-org.translate.goog/wiki/1985_Rome_and_Vienna_airport_attacks?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=rq" target="_blank">¿Qué sucedió?</a></p>
+        </div>
+        <div class="event"> <label=“105”>
+          <h2>26 de enero de 1986</h2>
+          <h3>Accidente del transbordador espacial Challenger</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Accidente_del_transbordador_espacial_Challenger" target="_blank">La historia del Challenger</a></p>
+        </div>
+        <div class="event"> <label=“106”>
+          <h2>7 de febrero de 1986</h2>
+          <h3>Estreno de <i>El color púrpura</i></h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_2778f7fa7b854da7b6a24e505cb2aae5~mv2.jpg">
+          <p><a href="https://es.wikipedia.org/wiki/El_color_púrpura" target="_blank">Acerca de la peli</a></p>
+        </div>
+        <div class="event"> <label=“107”>
+          <h2>15 de abril de 1986</h2>
+          <h3>Bombardeo de los Estados Unidos sobre Libia</h3>
+          <p><a href="https://es.wikipedia.org/wiki/Bombardeo_de_los_Estados_Unidos_sobre_Libia_de_1986" target="_blank">Un poco de historia</a></p>
+        </div>
+        <div class="event"> <label=“108”>
+          <h2>26 de abril de 1986</h2>
+          <h3>Accidente de Chernóbil</h3>
+          <p>El accidente de la central nuclear de Chernóbil solo tiene un papel testimonial en la novela, pero durante un tiempo quise incluirla de alguna forma en la trama. Por todo lo de la radiación, ya sabéis.</p>
+          <p><a href="https://es.wikipedia.org/wiki/Accidente_de_Chernóbil" target="_blank">Información extra sobre Chernóbil</a></p>
+        </div>
+        <div class="event"> <label=“109”>
+          <h2>19 de marzo de 1986</h2>
+          <h3>Estreno de <i>Platoon</i></h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_cae298f934cb4e0ca1b453b7c9ebd252~mv2.jpg">
+          <p><a href="https://es.wikipedia.org/wiki/Platoon" target="_blank">Sobre <i>Platoon</i></a></p>
+        </div>
+        <div class="event"> <label=“110”>
+          <h2>29 de marzo de 1987</h2>
+          <h3>Ron elige Literatura en Columbia</h3>
+        </div>
+        <div class="event"> <label=“111”>
+          <h2>9 de abril de 1987</h2>
+          <h3>Lady Di visita a enfermos de sida</h3>
+          <p>Tenía claro que quería incluir de alguna forma la historia de Lady Di visitando a enfermos y, aunque en mi mente, tenía mucha más importancia, en el texto definitivo solo ha quedado como una comparación que Don hace respecto a la valentía de Lady Di.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_21add108533a4b4e9747382b09abbfe4~mv2.jpg">
+					<p>En la foto de arriba podéis leer el texto (en inglés) que dice: «Debido a la humillación pública relacionada con el virus, incluso los pacientes en la sala de hospital eran reacios a aparecer en una fotografía. Solo un hombre, Ivan Cohen, de 32 años, accedió a que le tomaran una foto, pero desde atrás.» Como podéis ver, aún todavía tiene más sentido la comparación con la valentía que Don no tiene, porque en la foto no aparece un valiente, sino dos.<br>Además, esta visita de Lady Di a los enfermos de SIDA, tuvo una gran repercusión a la hora de cambiar la mirada de la opinión pública hacia el virus y quería incluirla. Abajo os dejo una foto y el video del que habla el tío Paul cuando da la noticia.</p>
+					<img src="https://static.wixstatic.com/media/f2a4bb_a756e5e5f4374c11b920257d35fa1eac~mv2.webp">
+					<div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/XU0SPrCTwsY?si=ubf7Yop9VGF4XdnR" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+        </div>
+        <div class="event"> <label=“112”>
+          <h2>Mayo de 1987</h2>
+          <h3>Conversación con Ron acerca de la carrera universitaria</h3>
+        </div>
+        <div class="event"> <label=“113”>
+          <h2>De septiembre de 1987 a marzo de 1988</h2>
+          <h3>Primer semestre Universidad</h3>
+          <p>En este caso, una concesión en aras del interés del autor: los semestres estadounidenses no se organizan de esta forma. He jugado con la verosimilitud, pero, por una vez, era necesario.</p>
+        </div>
+        <div class="event"> <label=“114”>
+          <h2>Del 4 al 13 de marzo de 1988</h2>
+          <h3>Vacaciones universitarias</h3>
+          <p>Las vacaciones sí que se corresponden al calendario lectivo del curso escolar 87-88 y son lo que  se llamaría <i>Spring Break.</i></p>
+        </div>
+        <div class="event"> <label=“115”>
+          <h2>6 de marzo de 1988</h2>
+          <h3>El tío Paul da la noticia de que tiene sida</h3>
+        </div>
+        <div class="event"> <label=“116”>
+          <h2>Del 14 de marzo al 24 de mayo de 1988</h2>
+          <h3>Segundo semestre viviendo en casa del tío Paul</h3>
+        </div>
+        <div class="event"> <label=“117”>
+          <h2>25 de mayo de 1988</h2>
+          <h3>Muere el tío Paul</h3>
+        </div>
+        <div class="event"> <label=“118”>
+          <h2>Del 26 de mayo al 15 de agosto de 1988</h2>
+          <h3>Don decide dejarse llevar</h3>
+        </div>
+        <div class="event"> <label=“119”>
+          <h2>15 de agosto de 1988</h2>
+          <h3>Don toma la decisión de vender el estudio de fotografía</h3>
+        </div>
+        <div class="event"> <label=“120”>
+          <h2>21 de agosto de 1988</h2>
+          <h3>Don encuentra el diario del tío Paul</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_e220a186d3594666bcca64d31765df97~mv2.jpg">
+          <p> La cita con la que empieza su diario, que tenéis aquí arriba y que yo escribo como «No debes mentirle a tu dietario» está sacada de un diario real, que se encontró en 1914 y que escribió Piete Kuhr (foto de abajo).</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_35b849da4e964262a93cb94128044dc7~mv2.jpg">
+          <p>Durante cinco años, esta hija de una profesora de música llevó un dietario donde seguía los acontecimientos de la Primera Guerra Mundial.<br>En este caso, me cuadraba la cita para el diario del tío Paul y, además, creí que enlazaba a Seiki, que sí luchó en la Primera Guerra Mundial, con el hijo perdido del tío Paul, mucho tiempo después. Este tipo de azares o conexiones no aparentes a simple vista siempre me animan a continuar escribiendo, aunque sea a modo de bromas privadas (aunque a partir de ahora ya no sean tan privadas).</p>
+        </div>
+        <div class="event"> <label=“121”>
+          <h2>Del 22 al 28 de agosto de 1988</h2>
+          <h3>Lectura del diario del tío Pauk</h3>
+          <p>Empieza el camino a la rotura mental definitiva de Don.</p>
+        </div>
+        <div class="event"> <label=“122”>
+          <h2>22 de agosto de 1988</h2>
+          <h3>Visita a Morley, el vecino, porque Don se ha excedido con los cortes</h3>
+        </div>
+        <div class="event"> <label=“123”>
+          <h2>28 de agosto de 1988</h2>
+          <h3>Suicidio de Ron</h3>
+        </div>
+        <div class="event"> <label=“124”>
+          <h2>29 de agosto de 1988</h2>
+          <h3>Vecino ve a Don desde las escaleras de incendios</h3>
+        </div>
+        <div class="event"> <label=“125”>
+          <h2>29 y 30 de agosto de 1988</h2>
+          <h3>Ingreso en urgencias por la crisis aguda en la que encuentran a Don</h3>
+        </div>
+        <div class="event"> <label=“126”>
+          <h2>30 de agosto de 1988</h2>
+          <h3>La tía Edith decide internar a Don en el sanatorio</h3>
+        </div>
+        <div class="event"> <label=“127”>
+          <h2>1 de septiembre de 1988</h2>
+          <h3>Ingreso en el sanatorio de Nueva Jersey</h3>
+          <p>En el caso particular del sanatorio de Nueva Jersey que usa las viejas técnicas de décadas anteriores, he tirado de mi imaginación al cien por cien.<br>Lo siento, es inventado.</p>
+        </div>
+        <div class="event"> <label=“128”>
+          <h2>Del 1 al 8 de septiembre de 1988</h2>
+          <h3>Don recupera la conciencia en momentos breves</h3>
+        </div>
+        <div class="event"> <label=“129”>
+          <h2>7 de septiembre de 1988</h2>
+          <h3>Nancy lo visita en su habitación</h3>
+        </div>
+        <div class="event"> <label=“130”>
+          <h2>Del 11 al 17 de septiembre de 1988</h2>
+          <h3>Don disfruta de su llaga en la espalda</h3>
+        </div>
+        <div class="event"> <label=“131”>
+          <h2>17 de septiembre de 1988</h2>
+          <h3>Reunión con el superintendente</h3>
+          <p>Nunca he sido fan de los personajes arquetípicos, porque creo que las personas no son bidimensionales, pero en esta novela, sentí la necesidad de inventarme dos personajes sacados de una novela de otra época, como son la enfermera Flynn y el doctor Clive Pearce, también el superintendente, pero aparece poco (basado en Orson Welles en Sed de Mal). Lo creí necesario como contrapunto a los supuestos locos que vivían en el sanatorio donde ingresa Don, porque era importante para mí que los internos parecieran más cuerdos que los empleados.<br>En ese aspecto, me tomé en serio algunos consejos de etiqueta de los años cuarenta y cincuenta. En este caso, os muestro cómo se hace un nudo Ascot como el que suele llevar el doctor Pearce y una foto de qué pinta tiene para mí el superintendente.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_263fbb4894ce4c6f8126272b4da1b5ac~mv2.png">
+          <img src="https://static.wixstatic.com/media/f2a4bb_d0773be129d84a1795e63d86134c1837~mv2.jpg">
+          <h3>Descubrimos el apellido de Don</h3>
+          <p>Durante la reunión con el superintendente, se descubre que el apellido de Don es Alden.</p>
+          <p><a href="http://mayflowerhistory.com/mayflower-passenger-list" target="_blank"> Si queréis leer la lista de apellidos de colonos del Mayflower, la tenéis aquí</a></p>
+          <h3>Don pasa al gallinero y tiene su primer encuentro con con Nancy, Dom y Kurt</h3>
+          <p>Las frases de Shakespeare que usa Dom para comunicarse las saqué de mi copia de <i>The complete works</i> y luego busqué alguna traducción</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_d238212aa1cd475c92760f1c0977b03b~mv2.jpg">
+        </div>
+        <div class="event"> <label=“135”>
+          <h2>Del 18 de septiembre al 11 de octubre de 1988</h2>
+          <h3>Don se adapta a los horarios del manicomio</h3>
+        </div>
+        <div class="event"> <label=“136”>
+          <h2>Del 21 de septiembre al 11 de octubre de 1988</h2>
+          <h3>Don usa la calma de los lavabos de madrugada para sus cortes</h3>
+        </div>
+        <div class="event"> <label=“137”>
+          <h2>11 de octubre de 1988</h2>
+          <h3>La enfermera Flynn pilla a Don en el lavabo y le da pastilla</h3>
+          <p>Por primera vez, Don pierde parte de su conciencia por las drogas suministradas en el sanatorio.</p>
+        </div>
+        <div class="event"> <label=“138”>
+          <h2>12 de octubre de 1988</h2>
+          <h3>Don empieza su tratamiento individualizado con el doctor Pearce</h3>
+        </div>
+        <div class="event"> <label=“139”>
+          <h2>Del 12 de octubre al 10 de diciembre de 1988</h2>
+          <h3>Don en el limbo de la medicación</h3>
+        </div>
+        <div class="event"> <label=“140”>
+          <h2>11 de diciembre de 1988</h2>
+          <h3>Sale del limbo porque tiene visita y Nancy y Dom le cuentan a Don su plan de escape</h3>
+        </div>
+        <div class="event"> <label=“142”>
+          <h2>12 de diciembre de 1988</h2>
+          <h3>Visita de la tía Edith</h3>
+          <p><a href="https://www.psicologosmadrid-ipsia.com/la-rueda-de-las-emociones/" target="_blank">Un poco de info acerca de la rueda de las emociones</a></p>
+        </div>
+        <div class="event"> <label=“143”>
+          <h2>Del 12 al 24 de diciembre de 1988</h2>
+          <h3>Don vuelve al limbo de la medicación</h3>
+        </div>
+        <div class="event"> <label=“144”>
+          <h2>25 de diciembre de 1988</h2>
+          <h3>Visita del senador y Don empieza a morder la medicación para reducir sus efectos</h3>
+        </div>
+        <div class="event"> <label=“146”>
+          <h2>27 de diciembre de 1988</h2>
+          <h3>Seiki va al manicomio para intentar sacar a Don</h3>
+        </div>
+        <div class="event"> <label=“147”>
+          <h2>31 de diciembre de 1988</h2>
+          <h3>Fiesta de fin de año en el sanatorio</h3>
+          <p>Durante la icónica escena de baile de Nancy, suena <i>Just like a woman</i>, de Nina Simone, publicada en 1971 en el álbum <i>Here comes the Sun</i>.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_9ad160bb47f341f5afef7a43def74ec3~mv2.jpg">
+          <p>La foto es del álbum de mi colección personal y si queréis escuchar la canción, aquí la tenéis.</p>
+          <div class="video-container">
+			      <p style="text-align: center;"><<iframe width="560" height="315" src="https://www.youtube.com/embed/T9gMsdNQSUM?si=cwZv5g0qYeID5bFr" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+        </div>
+        <div class="event"> <label=“148”>
+          <h2>1 de enero de 1988</h2>
+          <h3>Intento fallido de escape</h3>
+        </div>
+        <div class="event"> <label=“149”>
+          <h2>Del 1 de enero al 19 de marzo de 1989</h2>
+          <h3>Limbo de la medicación</h3>
+        </div>
+        <div class="event"> <label=“150”>
+          <h2>19 de marzo de 1989</h2>
+          <h3>Seiki saca a Don del sanatorio y vuelan con el Concorde hasta Londres</h3>
+          <p>Sí, el 19 de marzo es el día del padre…</p>
+        </div>
+        <div class="event"> <label=“152”>
+          <h2>Del 20 de marzo al 20 de abril de 1989</h2>
+          <h3>Ingreso en Queensland Hall</h3>
+          <p>Don aún no entiende por qué necesita profesionales de salud mental y no participa en terapia.</p>
+        </div>
+        <div class="event"> <label=“153”>
+          <h2>20 de abril de 1989</h2>
+          <h3>Primera visita de Seiki en Londres</h3>
+            <p>Seiki enseña a Don las fotografías familiares y este descubre que Ron es un producto de su imaginación.<br> Si lo hemos hecho bien, los lectores también lo habréis descubierto en ese momento.</p>
+        </div>
+        <div class="event"> <label=“154”>
+          <h2>21 de abril de 1989</h2>
+          <h3>Empieza la terapia con Margaret</h3>
+          <p>El estilo de psicología que se practica en Queensland Hall está sacado de <i>Esquizofrenia y presión social</i>, de Ronald D. Laing, que compré por pura casualidad en el Mercat de Sant Antoni de Barcelona de segunda (o tercera) mano.</p>
+          <p style="text-align: center;"><img src="https://static.wixstatic.com/media/f2a4bb_6c3ae443f72940e6ad242b8b8bbb374c~mv2.jpg" style="width: 50%;"></p>
+        </div>
+        <div class="event"> <label=“155”>
+          <h2>20 de mayo de 1989</h2>
+          <h3>Los vecinos irrumpen en Queensland Hall</h3>
+        </div>
+        <div class="event"> <label=“156”>
+          <h2>5 de junio de 1989</h2>
+          <h3>Ve a Alice por primera vez en el mercadillo</h3>
+          <img src="https://static.wixstatic.com/media/f2a4bb_c8cefff6346a442e860941a0dd5f6075~mv2.jpg">
+          <p>La foto es de un disco de Sidney Bechet de mi colección de vinilos. De hecho, siempre me imaginé que la música que suena en la escena era parecida a alguna de las dos que tenéis a continuación.</p>
+          <div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/SgDG61WnCoA?si=4zOCP682K1zhjkle" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+		      <div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/DC784DyDlRk?si=xcK6sTwpPw1r0642" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+        </div>
+        <div class="event"> <label=“157”>
+          <h2>7 de junio de 1989</h2>
+          <h3>Alice en terapia</h3>
+          <p>Don descubre que Alice ha venido a Londres para trabajar en Queensland Hall…<br>Ay, el azar…</p>
+        </div>
+        <div class="event"> <label=“158”>
+          <h2>7 de junio de 1989</h2>
+          <h3>Comida de pollo frito con Alice</h3>
+        </div>
+        <div class="event"> <label=“159”>
+          <h2>10 de agosto de 1989</h2>
+          <h3>Sesión de fotos con Alice y posterior sexo</h3>
+        </div>
+        <div class="event"> <label=“160”>
+          <h2>Del 15 de agosto al 16 de noviembre de 1989</h2>
+          <h3>Don se siente agobiado al lado de Alice</h3>
+        </div>
+        <div class="event"> <label=“161”>
+          <h2>16 de noviembre de 1989</h2>
+          <h3>Conversación con Alice acerca de su agobio</h3>
+        </div>
+        <div class="event"> <label=“162”>
+          <h2>Del 16 de noviembre de 1989 al 18 de febrero de 1990</h2>
+          <h3>Punto óptimo de la relación entre Don y Alice</h3>
+        </div>
+        <div class="event"> <label=“163”>
+          <h2>3 de marzo de 1990</h2>
+          <h3>Alice abandona Londres por la muerte de su madre y regresa a Brooklyn</h3>
+        </div>
+        <div class="event"> <label=“164”>
+          <h2>5 de marzo de 1990</h2>
+          <h3>Seiki saca a James del sanatorio</h3>
+        </div>
+        <div class="event"> <label=“165”>
+          <h2>10 de marzo de 1990</h2>
+          <h3>Don llega a Barcelona</h3>
+          <p> Para Barcelona, quería transmitir la sensación que tenía yo de niño, cuando bajaba al centro de la ciudad, viniendo de mi pequeño pueblo. Para ello, me inspiré en mis recuerdos, pero también fotos del periodo y en un video de los ochenta, que creo que expresa muy bien la diversidad de la ciudad preolímpica. Aquí abajo tenéis el video del que os hablo.</p>
+          <div class="video-container">
+			      <p style="text-align: center;"><iframe width="560" height="315" src="https://www.youtube.com/embed/DhYP1WaP08g?si=gAhsM8hR2BmjO-BW" 
+              frameborder="0"
+              allowfullscreen>
+			      </iframe></p>
+		      </div>
+          <p>Otra cosa para la que quería utilizar Barcelona, pero que luego se cayó de la novela, era el machismo de Seiki, que llevaba a Don de putas. Para ello, recopilé estos clasificados de un periódico de la época. Son un documento interesante y creo que merece la pena ponerlo aquí.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_9507e932ca4049fe9e8fc4c56372ba84~mv2.jpg">
+          <p>Durante su paseo hacia el restaurante donde lo espera Seiki, Don descubre la historia de los mascarones del barrio gótico de la ciudad condal.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_74e9122107e441268abc49d8af6a483f~mv2.jpg">
+          <p><a href="https://www.laramblabarcelona.com/carassas-barrio-gotico/" target="_blank">Aquí tenéis información de las «<i>carasses</i>»</a></p>
+          <p>Y Don también se sorprende de los agujeros en el mármol de un portal, creados por los tacones de las prostitutas durante las largas esperas de clientes.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_5c6241c79b6f445083c70be6c4ba7caf~mv2.jpg">
+          <p><a href="https://barcelonadesconocida.wordpress.com/2008/12/09/10/" target="_blank">Aquí podéis leer sobre esos agujeros típicos</a></p>
+          <h3><i>Los caracoles</i></h3>
+          <p><i>Los caracoles</i>, el restaurante donde Don conoce a James, está sacado de mi memoria. Es real, pero las sensaciones son mías. Os pongo una foto familiar de los ochenta, donde se ven mis padres disfrutando en el restaurante. Es probable que el autor de la foto, fuera yo mismo, pero esa es otra historia.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_5c3b9eea89aa471ebb367bcc25c73470~mv2.jpg">
+          <p>Por cierto, la postal del restaurante que le dan a Don es real y mi padre aún conserva una copia de ella, tan bien guardada entre las páginas de un libro, que después de documentar Seiki, no la he podido encontrar. Saldrá, sin duda, en alguna relectura.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_770106b9667646529acb79a9f7ed3fd9~mv2.jpg">
+          <p>Don conoce a James y Seiki lo lleva al local de La Rambla donde quiere que escriba su historia.</p>
+          <h3>Don se instala en el piso de Seiki</h3>
+          <p>El piso de Seiki, cuya dirección no voy a desvelar, es un piso real que estaba a la venta cuando documenté la novela y me interesaba por ubicación. La descripción ha sido lo más acurada posible teniendo en cuenta la información que poseía.<br>También quiero poner en valor estas guías urbanas de Barcelona y alrededores, provenientes del abuelo de Clara Capdevila, que me las cedió amablemente para poder reseguir las calles de la época preolímpica.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_473bbe140b514430ab73b00c241bf5ed~mv2.jpgg">
+        </div>
+        <div class="event"> <label=“171”>
+          <h2>Del 10 al 16 de marzo de 1990</h2>
+          <h3>Seiki deja que Don se habitue a James</h3>
+        </div>
+        <div class="event"> <label=“172”>
+          <h2>14 de marzo de 1990</h2>
+          <h3>Tarde en el Tibidabo con James</h3>
+          <p><a href="https://tibidabo.cat/es/quienes-somos/historia" target="_blank">Un poco de historia del centenario parque de atracciones</a></p>
+        </div>
+        <div class="event"> <label=“173”>
+          <h2>16 de marzo de 1990</h2>
+          <h3>Primera conversación de la vida de Seiki</h3>
+          <p>En esta primera conversación, Seiki le habla a Don del mundo que quiere y el mundo que no quiere y le cita dos fotografías, que pongo aquí.<br>La primera es de <a href="https://es.wikipedia.org/wiki/Garry_Winogrand" target="_blank">Garry Winogrand</a> y la segunda, de <a href="https://es.wikipedia.org/wiki/Peter_Magubane" target="_blank">Peter Magubane</a>.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_58a4daad1e9a4f92a1d6e11523b438cb~mv2.jpg">
+          <img src="https://static.wixstatic.com/media/f2a4bb_58a4daad1e9a4f92a1d6e11523b438cb~mv2.jpg">
+          <h3>Visita al Cristal City</h3>
+          <p>Después de la charla van al Cristal City. Con los antecedentes de <i>Los caracoles</i>, intenté, por todos los medios, ser igual de veraz en los otros establecimientos de la época, como el Cristal City, cuya información saqué del blog de barcelofilia y, en un comentario al respecto, en algún otro lugar, se podía leer: «Leía y cenaba un bocadillo o tapas y tortillas de todo tipo y que las hacían muy buenas... Pasé allí muchas tardes con un libro y una Fanta, sentada al fondo, leyendo libros que en casa no me hubieran permitido leer».<br>La foto es un escaneo de mi biblia.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_df9dc4e90c3f45e0a2c7b950cbc5d70e~mv2.jpg">
+          <p><a href="https://barcelofilia.blogspot.com/2024/07/cristal-city-bar-llibreria-balmes-294.html" target="_blank">Sobre el Cristal City en Barcelofília</a></p>
+	        <h3>Primera sesión de escritura en el despacho</h3>
+	        <p>Aquí descubrimos que la novela que estamos leyendo la ha escrito el propio Don.</p>
+        </div>
+        <div class="event"> <label=“176”>
+          <h2>17 de marzo de 1990</h2>
+          <h3>Paliza a James</h3>
+          <p>Situé la paliza en el parque de la Ciutadella, para contextualizarla con el asesinato de la transexual Sonia (en 1991) que sucedería en el mundo real de forma similar al ataque a James.<br>No me gustan los actos decididos porque sí, qué queréis que os diga…<br>La foto corresponde a la glorieta donde sucedió...</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_586bda6d97be4fbd8cf0eff5ec47389a~mv2.jpg">
+          <p><a href="https://es.wikipedia.org/wiki/Asesinato_de_Sonia_Rescalvo_Zafra" target="_blank">Información sobre el asesinato real que sucedió en el mismo lugar</a></p>
+          <p>James ingresa en el Hospital del Mar por las secuelas de la paliza.</>
+        </div>
+        <div class="event"> <label=“178”>
+          <h2>Del 17 al 20 de marzo de 1990</h2>
+          <h3>Don no abandona el lado de la cama de James</h3>
+        </div>
+        <div class="event"> <label=“179”>
+          <h2>20 de marzo de 1990</h2>
+          <h3>Seiki saca a Don del hospital y James despierta cuando ya no está</h3>
+        </div>
+        <div class="event"> <label=“181”>
+          <h2>21 de marzo de 1990</h2>
+          <h3>Don vuelve al hospital</h3>
+        </div>
+        <div class="event"> <label=“182”>
+          <h2>Del 21 al 25 de marzo de 1990</h2>
+          <h3>Último tramo historia Seiki</h3>
+        </div>
+        <div class="event"> <label=“183”>
+          <h2>26 de marzo de 1990</h2>
+          <h3>Don encuentra la dirección de Alice</h3>
+        </div>
+        <div class="event"> <label=“184”>
+          <h2>27 de marzo de 1990</h2>
+          <h3>Don deja Barcelona</h3>
+        </div>
+        <div class="event"> <label=“185”>
+          <h2>29 de marzo de 1990</h2>
+          <h3>Don visita la antigua sede de la U.S. Radium</h3>
+          <p>Las fotos en las que me basé para la descripción del retorno de Don a la sede de la US Radium Corporation, reales antes de que los edificios se demolieran. Por si queréis investigarlo, si ponéis <b>422-432 Alden Street, Orange, Essex County, New Jersey</b> en Google Maps, os sale la localización, que ahora es un campo de deportes. Aunque os la pongo aquí por si sentís curiosidad.</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_1e93e32df58647faae731cc5ce2710fe~mv2.jpg">
+          <img src="https://static.wixstatic.com/media/f2a4bb_9bd42c9b8367495f8c8af7037686a9f6~mv2.jpg">
+          <p style="text-align: center;"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2191.0894442226113!2d-74.230485925482!3d40.78165803335065!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c3ab2fa36bf3ef%3A0xb6fee0b6f5262fd8!2s422%20Alden%20St%2C%20City%20of%20Orange%2C%20NJ%2007050%2C%20EE.%20UU.!5e1!3m2!1ses!2ses!4v1746712158694!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></p>
+        </div>
+        <div class="event"> <label=“186”>
+          <h2>21 de marzo de 2021</h2>
+          <h3>Primera nota de <i>Seiki</i></h3>
+          <p>Página inicial de mi Moleskine (sí, el subtítulo era otro).</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_1fc25158346f4441b79cefda803cf1f8~mv2.jpg">
+        </div>
+        <div class="event"> <label=“FIN”>
+          <p>Para terminar, una cita de Paul Auster acerca de lo que siente cuando empieza a escribir una novela, que puede ser una de las razones por las que he tardado tanto en escribir esta: «Comienzo con una personalidad, en lugar de una idea. Y la persona se vuelve real para mí. Es casi como si me entregara y entrara en esa otra conciencia».<br>
+          <img src="https://static.wixstatic.com/media/f2a4bb_c2a6be4cded942ba806eae612050ea76~mv2.jpeg">
+          <p>Pues, esto es todo amigos… Y no, yo tampoco entiendo por qué ponían <i>La pantera rosa</i> en vez de <i>Looney Tunes</i>… Bueno, igual porque es muy molona (o por ser de mis favoritas).</p>
+          <img src="https://static.wixstatic.com/media/f2a4bb_193d6fb7b2044e0c811525fc8e5c486e~mv2.jpeg">
+        </div>
+      </div>
+    
+      <div class="arrow-wrapper-bottom">
+        <button id="next" class="nav-arrow">▼</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dates = document.querySelectorAll('#dates li');
+    const events = document.querySelectorAll('.event');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    let currentIndex = 0;
+
+	function showEvent(index) {
+	  events.forEach(e => e.classList.remove('active'));
+	  dates.forEach(d => d.classList.remove('active'));		  events[index].classList.add('active');
+	  dates[index].classList.add('active');
+	  currentIndex = index;
+	
+		  // Resetea el scroll interno del área de contenido
+	  document.getElementById("content-area").scrollTop = 0;
+	
+		  // Hace scroll al inicio del contenedor en pantalla
+	  document.querySelector(".container").scrollIntoView({
+		   behavior: "smooth"
+	  });
+}
+
+    dates.forEach((date, index) => {
+      date.addEventListener('click', () => showEvent(index));
+    });
+    
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) showEvent(currentIndex - 1);
+    });
+    
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex < events.length - 1) showEvent(currentIndex + 1);
+    });
+    
+    let lastVisibleEventId = null;
+    
+    	document.querySelector('.main-container').addEventListener('scroll', function () {
+        const eventElements = document.querySelectorAll('.event');
+    
+        let currentEvent = null;
+        let containerTop = this.scrollTop;
+    
+        eventElements.forEach(event => {
+        const offsetTop = event.offsetTop;
+        if (offsetTop - containerTop < 100) {
+            currentEvent = event;
+        }
+        });
+    
+        if (currentEvent && currentEvent.id !== lastVisibleEventId) {
+        lastVisibleEventId = currentEvent.id;
+        showEventDetails(currentEvent);
+        }
+    });
+  </script>
+</body>
+</html>
