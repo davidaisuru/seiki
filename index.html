@@ -1404,5 +1404,44 @@
         }
     });
   </script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const listItems = document.querySelectorAll("#dates li");
+    const events = document.querySelectorAll(".event");
+
+    // Restaurar el último clic
+    const lastIndex = localStorage.getItem("ultimoIndex");
+    if (lastIndex !== null) {
+      activateEvent(parseInt(lastIndex));
+    }
+
+    // Agregar clics a cada item
+    listItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        const index = item.getAttribute("data-index");
+        localStorage.setItem("ultimoIndex", index);
+        activateEvent(parseInt(index));
+      });
+    });
+
+    // Función para activar el evento y destacar el item
+    function activateEvent(index) {
+      // Quitar clases activas
+      listItems.forEach(li => li.classList.remove("active"));
+      events.forEach(ev => ev.classList.remove("active"));
+
+      const item = document.querySelector(`#dates li[data-index="${index}"]`);
+      const event = events[index];
+
+      if (item && event) {
+        item.classList.add("active");
+        event.classList.add("active");
+
+        // Asegurarse de que el evento se vea en pantalla
+        event.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  });
+ </script>
 </body>
 </html>
