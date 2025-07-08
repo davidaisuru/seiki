@@ -1408,27 +1408,53 @@
    document.addEventListener("DOMContentLoaded", () => {
     const listItems = document.querySelectorAll("#dates li");
     const events = document.querySelectorAll(".event");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
 
-    // Restaurar el último clic
+    let currentIndex = 0;
+
+    // Restaurar índice si existe
     const lastIndex = localStorage.getItem("ultimoIndex");
-    if (lastIndex !== null) {
-      activateEvent(parseInt(lastIndex));
+    if (lastIndex !== null && !isNaN(lastIndex)) {
+      currentIndex = parseInt(lastIndex);
+      activateEvent(currentIndex);
+    } else {
+      activateEvent(0);
     }
 
-    // Agregar clics a cada item
+    // Click lateral
     listItems.forEach((item) => {
       item.addEventListener("click", () => {
-        const index = item.getAttribute("data-index");
-        localStorage.setItem("ultimoIndex", index);
-        activateEvent(parseInt(index));
+        currentIndex = parseInt(item.getAttribute("data-index"));
+        localStorage.setItem("ultimoIndex", currentIndex);
+        activateEvent(currentIndex);
       });
     });
 
-    // Función para activar el evento y destacar el item
+    // Flechas
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          localStorage.setItem("ultimoIndex", currentIndex);
+          activateEvent(currentIndex);
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        if (currentIndex < events.length - 1) {
+          currentIndex++;
+          localStorage.setItem("ultimoIndex", currentIndex);
+          activateEvent(currentIndex);
+        }
+      });
+    }
+
     function activateEvent(index) {
-      // Quitar clases activas
-      listItems.forEach(li => li.classList.remove("active"));
-      events.forEach(ev => ev.classList.remove("active"));
+      listItems.forEach((li) => li.classList.remove("active"));
+      events.forEach((ev) => ev.classList.remove("active"));
 
       const item = document.querySelector(`#dates li[data-index="${index}"]`);
       const event = events[index];
@@ -1437,11 +1463,11 @@
         item.classList.add("active");
         event.classList.add("active");
 
-        // Asegurarse de que el evento se vea en pantalla
         event.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
   });
  </script>
+
 </body>
 </html>
